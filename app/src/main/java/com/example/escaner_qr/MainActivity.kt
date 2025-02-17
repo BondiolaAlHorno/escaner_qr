@@ -33,9 +33,15 @@ import io.github.g00fy2.quickie.ScanQRCode
 import android.widget.Button
 import android.widget.TextView
 import android.widget.ImageView
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import com.example.escaner_qr.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
+
+    /*private lateinit var binding: ActivityMainBinding*/
 
     // Registra el lanzador para el escáner
     private val scanQrCodeLauncher = registerForActivityResult(ScanQRCode()) { result ->
@@ -43,6 +49,7 @@ class MainActivity : AppCompatActivity() {
             is QRResult.QRSuccess -> {
                 val scannedText = result.content.rawValue
                 tvResult.text = "$scannedText"
+                scanCheck = true
             }
             QRResult.QRUserCanceled -> {
                 tvResult.text = "Escaneo cancelado por el usuario"
@@ -52,20 +59,33 @@ class MainActivity : AppCompatActivity() {
             }
             is QRResult.QRError -> {
                 tvResult.text = "Error: ${result.exception.message}"
+                scanCheck = true
             }
         }
     }
 
-    // Declara las vistas
+    private fun copyToClipboard(context: Context, text: String) {
+        // Obtén el servicio del portapapeles
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        // Crea un ClipData con el texto que deseas copiar
+        val clipData = ClipData.newPlainText("label", text)
+
+        // Asigna el ClipData al portapapeles
+        clipboardManager.setPrimaryClip(clipData)
+    }
+
     private lateinit var btnScan: ImageView
     private lateinit var tvResult: TextView
+    private var scanCheck:Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        /*// Inflar el layout usando View Binding
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)*/
         setContentView(R.layout.activity_main)
-
-        // Configura el listener para los insets de la ventana
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -79,6 +99,12 @@ class MainActivity : AppCompatActivity() {
         // Configura el clic del botón para iniciar el escáner
         btnScan.setOnClickListener {
             scanQrCodeLauncher.launch(null)
+        }
+
+        tvResult.setOnClickListener{
+            if (scanCheck){
+                copyToClipboard(this,tvResult.text.toString())
+            }
         }
     }
 }
