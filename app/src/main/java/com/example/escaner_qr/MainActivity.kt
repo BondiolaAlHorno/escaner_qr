@@ -11,6 +11,7 @@ import io.github.g00fy2.quickie.ScanQRCode
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.core.view.WindowCompat
 import com.example.escaner_qr.databinding.ActivityMainBinding
 
 
@@ -55,9 +56,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         // Inflar el layout usando View Binding
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Asegura de que la aplicación respete los márgenes de la barra de navegación
+        WindowCompat.setDecorFitsSystemWindows(window, true)
 
         // Configura el clic del botón para iniciar el escáner
         binding.btnScan.setOnClickListener {
