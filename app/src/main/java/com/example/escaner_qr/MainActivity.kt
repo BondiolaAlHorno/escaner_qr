@@ -13,6 +13,9 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.core.view.WindowCompat
 import com.example.escaner_qr.databinding.ActivityMainBinding
+import android.content.Intent
+import android.net.Uri
+import androidx.appcompat.app.AlertDialog
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,7 +29,8 @@ class MainActivity : AppCompatActivity() {
         when (result) {
             is QRResult.QRSuccess -> {
                 val scannedText = result.content.rawValue
-                binding.tvResult.text = "$scannedText"
+                /*binding.tvResult.text = "$scannedText"*/
+                formatContent(scannedText.toString())
                 scanCheck = true
             }
             QRResult.QRUserCanceled -> {
@@ -51,6 +55,44 @@ class MainActivity : AppCompatActivity() {
 
         // Asigna el ClipData al portapapeles
         clipboardManager.setPrimaryClip(clipData)
+    }
+
+    private fun formatContent(scannedText: String) {
+        if (scannedText.startsWith("WIFI:")) {
+            val pattern = Regex("WIFI:S:(.*?);T:(.*?);P:(.*?);H:(.*?);;")
+            val matchResult = pattern.find(scannedText)
+
+            if (matchResult != null) {
+                val (ssid, securityType, password, hidden) = matchResult.destructured
+                binding.tvResult.text = "WIFI: $ssid \nContraseña: $password \nTipo: $securityType"
+            }
+            else {
+                binding.tvResult.text = scannedText
+            }
+        }
+        else if (scannedText.startsWith("http://") || scannedText.startsWith("https://")) {
+            binding.tvResult.text = scannedText
+            openLinkDialog(scannedText,this)
+        }
+        else {
+            binding.tvResult.text = scannedText
+        }
+    }
+
+    fun openLinkDialog(scannedText: String, activity: AppCompatActivity) {
+        val alertDialogBuilder = AlertDialog.Builder(activity)
+        alertDialogBuilder.setTitle("¿Deseas abrir el siguiente enlace?")
+        alertDialogBuilder.setMessage("$scannedText")
+
+        alertDialogBuilder.setPositiveButton("Abrir") { dialog, which ->
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedText))
+            activity.startActivity(intent)
+        }
+        alertDialogBuilder.setNegativeButton("Cancelar") { dialog, which ->
+            dialog.dismiss()
+        }
+        val alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

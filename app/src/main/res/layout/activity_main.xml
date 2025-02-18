@@ -33,6 +33,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnScan"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:background="@drawable/circle_shape"
@@ -43,7 +44,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/btnScan"
+
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:src="@drawable/qrcode_scan"
