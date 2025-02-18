@@ -1,5 +1,5 @@
 <!-- res/drawable/rounded_corners.xml -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/white" /> <!-- Color de fondo -->
-    <corners android:radius="60dp" /> <!-- Radio de las esquinas -->
+    <!--<solid android:color="@color/white" /> &lt;!&ndash; Color de fondo &ndash;&gt;-->
+    <corners android:radius="360dp" /> <!-- Radio de las esquinas -->
 </shape>
