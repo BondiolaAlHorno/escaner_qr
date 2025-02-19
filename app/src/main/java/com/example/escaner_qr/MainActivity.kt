@@ -15,6 +15,7 @@ import androidx.core.view.WindowCompat
 import com.example.escaner_qr.databinding.ActivityMainBinding
 import android.content.Intent
 import android.net.Uri
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 
 
@@ -24,14 +25,17 @@ class MainActivity : AppCompatActivity() {
 
     private var scanCheck:Boolean = false
 
+    private var wifiNameContent:String = ""
+    private var wifiPasswordContent:String = ""
+
     // Registra el lanzador para el escáner
     private val scanQrCodeLauncher = registerForActivityResult(ScanQRCode()) { result ->
         when (result) {
             is QRResult.QRSuccess -> {
                 val scannedText = result.content.rawValue
                 /*binding.tvResult.text = "$scannedText"*/
-                formatContent(scannedText.toString())
                 scanCheck = true
+                formatContent(scannedText.toString())
             }
             QRResult.QRUserCanceled -> {
                 binding.tvResult.text = "Escaneo cancelado por el usuario"
@@ -64,7 +68,15 @@ class MainActivity : AppCompatActivity() {
 
             if (matchResult != null) {
                 val (ssid, securityType, password, hidden) = matchResult.destructured
-                binding.tvResult.text = "WIFI: $ssid \nContraseña: $password \nTipo: $securityType"
+                /*binding.tvResult.text = "WIFI: $ssid \nContraseña: $password \nTipo: $securityType"*/
+                binding.tvResult.text = "Tipo: $securityType"
+                binding.wifiName.text = "Wifi: $ssid"
+                binding.wifiPassword.text = "Contraseña: $password"
+                binding.wifiPassword.visibility = View.VISIBLE
+                binding.wifiName.visibility = View.VISIBLE
+                wifiNameContent = "$ssid"
+                wifiPasswordContent = "$password"
+                scanCheck = false
             }
             else {
                 binding.tvResult.text = scannedText
@@ -79,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun openLinkDialog(scannedText: String, activity: AppCompatActivity) {
+    private fun openLinkDialog(scannedText: String, activity: AppCompatActivity) {
         val alertDialogBuilder = AlertDialog.Builder(activity)
         alertDialogBuilder.setTitle("¿Deseas abrir el siguiente enlace?")
         alertDialogBuilder.setMessage("$scannedText")
@@ -95,6 +107,12 @@ class MainActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
+    private fun copyStateFalse(){
+        binding.wifiPassword.visibility = View.GONE
+        binding.wifiName.visibility = View.GONE
+        scanCheck = false
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -108,6 +126,7 @@ class MainActivity : AppCompatActivity() {
 
         // Configura el clic del botón para iniciar el escáner
         binding.btnScan.setOnClickListener {
+            copyStateFalse()
             scanQrCodeLauncher.launch(null)
         }
 
@@ -115,6 +134,12 @@ class MainActivity : AppCompatActivity() {
             if (scanCheck){
                 copyToClipboard(this,binding.tvResult.text.toString())
             }
+        }
+        binding.wifiName.setOnClickListener{
+            copyToClipboard(this,wifiNameContent)
+        }
+        binding.wifiPassword.setOnClickListener{
+            copyToClipboard(this,wifiPasswordContent)
         }
     }
 }
