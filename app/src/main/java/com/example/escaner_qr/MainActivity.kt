@@ -2,10 +2,7 @@ package com.example.escaner_qr
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import io.github.g00fy2.quickie.QRResult
 import io.github.g00fy2.quickie.ScanQRCode
 import android.content.ClipData
@@ -66,15 +63,15 @@ class MainActivity : AppCompatActivity() {
             val matchResult = pattern.find(scannedText)
 
             if (matchResult != null) {
-                val (ssid, securityType, password, hidden) = matchResult.destructured
+                val (ssid, securityType, password) = matchResult.destructured
                 /*binding.qrResult.text = "WIFI: $ssid \nContraseña: $password \nTipo: $securityType"*/
                 binding.qrResult.text = "Tipo: $securityType"
                 binding.wifiName.text = "Wifi: $ssid"
                 binding.wifiPassword.text = "Contraseña: $password"
                 binding.wifiPassword.visibility = View.VISIBLE
                 binding.wifiName.visibility = View.VISIBLE
-                wifiResult["name"] = "$ssid"
-                wifiResult["password"] = "$password"
+                wifiResult["name"] = ssid
+                wifiResult["password"] = password
                 scanCheck = false
             }
             else {
@@ -93,7 +90,7 @@ class MainActivity : AppCompatActivity() {
     private fun openLinkDialog(scannedText: String, activity: AppCompatActivity) {
         val alertDialogBuilder = AlertDialog.Builder(activity)
         alertDialogBuilder.setTitle("¿Deseas abrir el siguiente enlace?")
-        alertDialogBuilder.setMessage("$scannedText")
+        alertDialogBuilder.setMessage(scannedText)
 
         alertDialogBuilder.setPositiveButton("Abrir") { dialog, which ->
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedText))
