@@ -32,18 +32,18 @@ class MainActivity : AppCompatActivity() {
         when (result) {
             is QRResult.QRSuccess -> {
                 val scannedText = result.content.rawValue
-                /*binding.tvResult.text = "$scannedText"*/
+                /*binding.qrResult.text = "$scannedText"*/
                 scanCheck = true
                 formatContent(scannedText.toString())
             }
             QRResult.QRUserCanceled -> {
-                binding.tvResult.text = "Escaneo cancelado por el usuario"
+                binding.qrResult.text = "Escaneo cancelado por el usuario"
             }
             QRResult.QRMissingPermission -> {
-                binding.tvResult.text = "Permiso de cámara no concedido"
+                binding.qrResult.text = "Permiso de cámara no concedido"
             }
             is QRResult.QRError -> {
-                binding.tvResult.text = "Error: ${result.exception.message}"
+                binding.qrResult.text = "Error: ${result.exception.message}"
                 scanCheck = true
             }
         }
@@ -67,8 +67,8 @@ class MainActivity : AppCompatActivity() {
 
             if (matchResult != null) {
                 val (ssid, securityType, password, hidden) = matchResult.destructured
-                /*binding.tvResult.text = "WIFI: $ssid \nContraseña: $password \nTipo: $securityType"*/
-                binding.tvResult.text = "Tipo: $securityType"
+                /*binding.qrResult.text = "WIFI: $ssid \nContraseña: $password \nTipo: $securityType"*/
+                binding.qrResult.text = "Tipo: $securityType"
                 binding.wifiName.text = "Wifi: $ssid"
                 binding.wifiPassword.text = "Contraseña: $password"
                 binding.wifiPassword.visibility = View.VISIBLE
@@ -78,15 +78,15 @@ class MainActivity : AppCompatActivity() {
                 scanCheck = false
             }
             else {
-                binding.tvResult.text = scannedText
+                binding.qrResult.text = scannedText
             }
         }
         else if (scannedText.startsWith("http://") || scannedText.startsWith("https://")) {
-            binding.tvResult.text = scannedText
+            binding.qrResult.text = scannedText
             openLinkDialog(scannedText,this)
         }
         else {
-            binding.tvResult.text = scannedText
+            binding.qrResult.text = scannedText
         }
     }
 
@@ -129,9 +129,9 @@ class MainActivity : AppCompatActivity() {
             scanQrCodeLauncher.launch(null)
         }
 
-        binding.tvResult.setOnClickListener{
+        binding.qrResult.setOnClickListener{
             if (scanCheck){
-                copyToClipboard(this,binding.tvResult.text.toString())
+                copyToClipboard(this,binding.qrResult.text.toString())
             }
         }
         binding.wifiName.setOnClickListener{

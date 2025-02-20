@@ -73,7 +73,7 @@
         app:layout_constraintVertical_bias="0.446" />
 
     <TextView
-        android:id="@+id/tvResult"
+        android:id="@+id/qrResult"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
