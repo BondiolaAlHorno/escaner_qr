@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import io.github.g00fy2.quickie.QRResult
-import io.github.g00fy2.quickie.ScanQRCode
+import io.github.g00fy2.quickie.ScanCustomCode
+import io.github.g00fy2.quickie.config.BarcodeFormat
+import io.github.g00fy2.quickie.config.ScannerConfig
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -25,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     private val wifiResult = mutableMapOf("name" to "", "password" to "")
 
     // Registra el lanzador para el escáner
-    private val scanQrCodeLauncher = registerForActivityResult(ScanQRCode()) { result ->
+    private val scanCustomCodeLauncher = registerForActivityResult(ScanCustomCode()) { result ->
         when (result) {
             is QRResult.QRSuccess -> {
                 val scannedText = result.content.rawValue
@@ -123,7 +125,11 @@ class MainActivity : AppCompatActivity() {
         // Configura el clic del botón para iniciar el escáner
         binding.btnScan.setOnClickListener {
             copyStateFalse()
-            scanQrCodeLauncher.launch(null)
+            scanCustomCodeLauncher.launch(
+                ScannerConfig.build {
+                    setBarcodeFormats(listOf(BarcodeFormat.FORMAT_ALL_FORMATS))
+                }
+            )
         }
 
         binding.qrResult.setOnClickListener{
