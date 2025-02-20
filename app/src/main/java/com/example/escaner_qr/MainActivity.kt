@@ -25,8 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     private var scanCheck:Boolean = false
 
-    private var wifiNameContent:String = ""
-    private var wifiPasswordContent:String = ""
+    private val wifiResult = mutableMapOf("name" to "", "password" to "")
 
     // Registra el lanzador para el escáner
     private val scanQrCodeLauncher = registerForActivityResult(ScanQRCode()) { result ->
@@ -74,8 +73,8 @@ class MainActivity : AppCompatActivity() {
                 binding.wifiPassword.text = "Contraseña: $password"
                 binding.wifiPassword.visibility = View.VISIBLE
                 binding.wifiName.visibility = View.VISIBLE
-                wifiNameContent = "$ssid"
-                wifiPasswordContent = "$password"
+                wifiResult["name"] = "$ssid"
+                wifiResult["password"] = "$password"
                 scanCheck = false
             }
             else {
@@ -136,10 +135,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.wifiName.setOnClickListener{
-            copyToClipboard(this,wifiNameContent)
+            copyToClipboard(this,wifiResult["name"].toString())
         }
         binding.wifiPassword.setOnClickListener{
-            copyToClipboard(this,wifiPasswordContent)
+            copyToClipboard(this,wifiResult["password"].toString())
         }
     }
 }
