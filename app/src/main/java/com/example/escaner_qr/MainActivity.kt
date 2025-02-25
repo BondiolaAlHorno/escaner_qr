@@ -13,9 +13,16 @@ import android.content.Context
 import androidx.core.view.WindowCompat
 import com.example.escaner_qr.databinding.ActivityMainBinding
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import android.Manifest
+import android.net.wifi.WifiManager
+import android.net.wifi.WifiNetworkSuggestion
+import android.provider.Settings
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +32,8 @@ class MainActivity : AppCompatActivity() {
     private var scanCheck:Boolean = false
 
     private val wifiResult = mutableMapOf("name" to "", "password" to "")
+
+    private val REQUEST_CODE_LOCATION = 1001
 
     // Registra el lanzador para el escáner
     private val scanCustomCodeLauncher = registerForActivityResult(ScanCustomCode()) { result ->
@@ -75,6 +84,7 @@ class MainActivity : AppCompatActivity() {
                 wifiResult["name"] = ssid
                 wifiResult["password"] = password
                 scanCheck = false
+                openWifiDialog(ssid,password,securityType,this)
             }
             else {
                 binding.qrResult.text = scannedText
@@ -109,6 +119,89 @@ class MainActivity : AppCompatActivity() {
         binding.wifiPassword.visibility = View.GONE
         binding.wifiName.visibility = View.GONE
         scanCheck = false
+    }
+
+    private fun RequestWifiPermissions() {
+        // Solicita ambos permisos
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ),
+            REQUEST_CODE_LOCATION
+        )
+    }
+
+    private fun checkWifiPermissions():Boolean{
+        return if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            false
+        } else {
+            true
+        }
+    }
+
+    private fun openWifiDialog(ssid: String, password: String, securityType: String, activity: AppCompatActivity) {
+        val alertDialogBuilder = AlertDialog.Builder(activity)
+        alertDialogBuilder.setTitle("¿Deseas conectarse a la siguiente red WIFI?")
+        alertDialogBuilder.setMessage(ssid)
+
+        alertDialogBuilder.setPositiveButton("Conectarse") { dialog, which ->
+            if (checkWifiPermissions()) {
+                suggestWifiNetwork(ssid, password, securityType)
+            }
+            else{
+                RequestWifiPermissions()
+                openWifiDialog(ssid,password,securityType,this)
+            }
+        }
+        alertDialogBuilder.setNegativeButton("Cancelar") { dialog, which ->
+            dialog.dismiss()
+        }
+        val alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
+    }
+
+    private fun suggestWifiNetwork(ssid: String, password: String, securityType: String) {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        /*wifiManager.removeNetworkSuggestions(emptyList())*/ // Elimina todas las sugerencias anteriores
+
+        val suggestion = when (securityType.uppercase()) {
+            "WPA","WPA2" -> WifiNetworkSuggestion.Builder()
+                .setSsid(ssid)
+                .setWpa2Passphrase(password)
+                .setIsAppInteractionRequired(true)
+                .build()
+
+            "WPA3" -> WifiNetworkSuggestion.Builder()
+                .setSsid(ssid)
+                .setWpa3Passphrase(password)
+                .setIsAppInteractionRequired(true)
+                .build()
+
+            "NOPASS" -> WifiNetworkSuggestion.Builder()
+                .setSsid(ssid)
+                .setIsEnhancedOpen(true) // Para redes abiertas
+                .setIsAppInteractionRequired(true)
+                .build()
+
+            else -> {
+                return
+            }
+            }
+
+        val suggestionsList = listOf(suggestion)
+
+        // Agrega la sugerencia al sistema
+        wifiManager.addNetworkSuggestions(suggestionsList)
+
+        openWifiSettings()
+    }
+
+    private fun openWifiSettings() {
+        val intent = Intent(Settings.ACTION_WIFI_SETTINGS)
+        startActivity(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
